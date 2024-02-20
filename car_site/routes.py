@@ -75,13 +75,12 @@ def account():
 def new_post():
     form = PostForm()
     if form.validate_on_submit():
-        post = Post(title=form.title.data, content=form.content.data, image=form.image.data, author=current_user)
+        post = Post(title=form.title.data, content=form.content.data, author=current_user)
         db.session.add(post)
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
-    return render_template('create_post.html', title='New Car',
-                           form=form, legend='New Car', content='Content', image='Upload Image')
+    return render_template('create_post.html', title='New Car', form=form, legend='New Car', content='Content')
 
 @app.route("/post/<int:post_id>")
 def post(post_id):
@@ -105,8 +104,7 @@ def update_post(post_id):
     elif request.method == 'GET':
         form.title.data = post.title
         form.content.data = post.content
-    return render_template('create_post.html', title='Update Post',
-                           form=form, legend='Update Post')
+    return render_template('create_post.html', title='Update Post', form=form, legend='Update Post')
 
 
 @app.route("/post/<int:post_id>/delete", methods=['POST'])
