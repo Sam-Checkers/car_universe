@@ -6,6 +6,8 @@ from flask_login import current_user
 from flask_wtf.file import FileField, FileAllowed
 
 class RegistrationForm(FlaskForm):
+    first = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
+    last = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])

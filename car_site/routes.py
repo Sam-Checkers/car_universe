@@ -1,12 +1,10 @@
 import os
 import secrets
-from PIL import Image
-from flask import Flask, render_template, url_for, flash, redirect, request, abort
+from flask import Flask, render_template, url_for, flash, redirect, request, abort, jsonify
 from car_site.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from car_site.models import User, Post
+from car_site.models import User, Post, login_manager, load_user
+from flask_login import login_user, current_user, logout_user, login_required 
 from car_site import app, db, bcrypt
-from flask_login import login_user, current_user, logout_user, login_required
-import numpy as np
 
 @app.route("/")
 @app.route("/home")
@@ -47,7 +45,7 @@ def login():
             next_page = request.args.get('next')
             return redirect(next_page) if next_page else redirect(url_for('home'))
         else:
-            flash('Login Unsuccessful. Please check email and password', 'danger')
+            flash('Login Unsuccessful. Please check email and password')
     return render_template('login.html', title='Login', form=form)
 
 @app.route("/logout")
