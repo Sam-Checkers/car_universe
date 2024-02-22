@@ -1,10 +1,8 @@
-import os
-import secrets
-from flask import Flask, render_template, url_for, flash, redirect, request, abort, jsonify
+from flask import render_template, url_for, flash, redirect, request, abort
 from car_site.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from car_site.models import User, Post, login_manager, load_user
+from car_site.models import User, Post, check_password_hash
 from flask_login import login_user, current_user, logout_user, login_required 
-from car_site import app, db, bcrypt
+from car_site import app, db
 
 @app.route("/")
 @app.route("/home")
@@ -24,11 +22,13 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
-        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        user = User(username=form.username.data, email=form.email.data, password=hashed_password)
+        email = form.email.data
+        password = form.password.data
+        print(email, password)
+        user = User(email, password = password)
         db.session.add(user)
         db.session.commit()
-        flash('Your account has been created! You are now able to log in', 'success')
+        flash('Success!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
@@ -38,14 +38,18 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
-    if form.validate_on_submit():
-        user = User.query.filter_by(email=form.email.data).first()
-        if user and bcrypt.check_password_hash(user.password, form.password.data):
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('home'))
+    if request.method == 'POST' and form.validate_on_submit():
+        email = form.email.data
+        password = form.password.data
+        print(email,password)
+        logged_user = User.query.filter(User.email == email).first()
+        if logged_user and check_password_hash(logged_user.password, password):
+            login_user(logged_user)
+            flash('Success')
+            return redirect(url_for('home'))
         else:
-            flash('Login Unsuccessful. Please check email and password')
+            flash('Check email and password')
+            return redirect(url_for('auth.signin'))
     return render_template('login.html', title='Login', form=form)
 
 @app.route("/logout")
