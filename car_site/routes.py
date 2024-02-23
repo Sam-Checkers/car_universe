@@ -1,8 +1,8 @@
 from flask import render_template, url_for, flash, redirect, request, abort
 from car_site.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from car_site.models import User, Post, check_password_hash
+from car_site.models import User, Post, check_password_hash, db
 from flask_login import login_user, current_user, logout_user, login_required 
-from car_site import app, db
+from car_site import app
 
 @app.route("/")
 @app.route("/home")
@@ -24,12 +24,16 @@ def register():
     if form.validate_on_submit():
         email = form.email.data
         password = form.password.data
-        print(email, password)
-        user = User(email, password = password)
-        db.session.add(user)
-        db.session.commit()
-        flash('Success!')
-        return redirect(url_for('login'))
+        confirm_password = form.confirm_password.data
+        if password == confirm_password:
+            print(email, password)
+            user = User(username=form.username.data, email=form.email.data, password=password)
+            db.session.add(user)
+            db.session.commit()
+            flash('Success!')
+            return redirect(url_for('login'))
+        else:
+            flash('try again')
     return render_template('register.html', title='Register', form=form)
 
 

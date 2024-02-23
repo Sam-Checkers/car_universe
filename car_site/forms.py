@@ -6,12 +6,12 @@ from flask_login import current_user
 from flask_wtf.file import FileField, FileAllowed
 
 class RegistrationForm(FlaskForm):
-    first = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)])
-    last = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)])
+    first = StringField('First Name', validators=[DataRequired(), Length(min=2, max=20)], default='')
+    last = StringField('Last Name', validators=[DataRequired(), Length(min=2, max=20)], default='')
     username = StringField('Username', validators=[DataRequired(), Length(min=2, max=20)])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
-    confirm_password = PasswordField('Confirm Password', validators=[DataRequired(), EqualTo('password')])
+    confirm_password = PasswordField('Confirm_Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Sign Up')
 
     def validate_username(self, username):

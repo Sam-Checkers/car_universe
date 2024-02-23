@@ -6,10 +6,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 import uuid
 from werkzeug.security import generate_password_hash, check_password_hash
-from car_site.__init__ import db, login_manager
-from car_site import app
 
-login_manager = LoginManager(app)
+login_manager = LoginManager()
 db=SQLAlchemy()
 ma = Marshmallow()
 
@@ -29,7 +27,7 @@ class User(db.Model, UserMixin):
     token = db.Column(db.String, default = '', unique = True )
     posts = db.relationship('Post', backref='author', lazy=True)
 
-    def __init__(self, email, first_name='', last_name='', password='', token='', g_auth_verify=False):
+    def __init__(self, email, password, first_name='', last_name='', token='', g_auth_verify=False):
         self.id = self.set_id()
         self.first_name = first_name
         self.last_name = last_name
