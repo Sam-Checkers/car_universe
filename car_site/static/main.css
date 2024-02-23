@@ -26,7 +26,6 @@ body {
   }
 
   .content-section {
-    background-image: url(/car_site/static/images/arid.webp);
     padding: 10px 20px;
     border: 1px solid #dddddd;
     border-radius: 3px;

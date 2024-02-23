@@ -5,4 +5,4 @@ from car_site import app
 
 @app.route('/getdata')
 def getdata():
-    return User
+    return {'yee': 'naw'}
