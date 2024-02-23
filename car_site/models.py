@@ -22,26 +22,23 @@ class User(db.Model, UserMixin):
     last_name = db.Column(db.String(150), nullable = True, default = '')
     username = db.Column(db.String(20), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password = db.Column(db.String(60), nullable=False)
+    password = db.Column(db.String(120), nullable=False)
     g_auth_verify = db.Column(db.Boolean, default = False)
     token = db.Column(db.String, default = '', unique = True )
     posts = db.relationship('Post', backref='author', lazy=True)
 
-    def __init__(self, email, password, first_name='', last_name='', token='', g_auth_verify=False):
-        self.id = self.set_id()
+    def __init__(self, first_name='', last_name='', username='', email='', password='', g_auth_verify=False, token=''):
         self.first_name = first_name
         self.last_name = last_name
-        self.password = self.set_password(password)
+        self.username = username
         self.email = email
+        self.password = self.set_password(password)
         self.token = self.set_token(24)
         self.g_auth_verify = g_auth_verify
 
     def set_token(self, length):
         return secrets.token_hex(length)
 
-    def set_id(self):
-        return str(uuid.uuid4())
-    
     def set_password(self, password):
         self.pw_hash = generate_password_hash(password)
         return self.pw_hash

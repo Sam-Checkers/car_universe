@@ -22,18 +22,18 @@ def register():
         return redirect(url_for('home'))
     form = RegistrationForm()
     if form.validate_on_submit():
+        first_name = form.first.data
+        last_name = form.last.data
         email = form.email.data
         password = form.password.data
-        confirm_password = form.confirm_password.data
-        if password == confirm_password:
-            print(email, password)
-            user = User(username=form.username.data, email=form.email.data, password=password)
-            db.session.add(user)
-            db.session.commit()
-            flash('Success!')
-            return redirect(url_for('login'))
-        else:
-            flash('try again')
+        username=form.username.data
+        email=form.email.data
+        password=form.password.data
+        user = User(first_name, last_name, username, email, password)
+        db.session.add(user)
+        db.session.commit()
+        flash('Success!')
+        return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
 
 
