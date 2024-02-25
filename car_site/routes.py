@@ -3,6 +3,10 @@ from car_site.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostF
 from car_site.models import User, Post, check_password_hash, db
 from flask_login import login_user, current_user, logout_user, login_required 
 from car_site import app
+from PIL import Image
+import numpy as np
+import base64
+import os
 
 @app.route("/")
 @app.route("/home")
@@ -75,6 +79,18 @@ def account():
         form.username.data = current_user.username
         form.email.data = current_user.email
     return render_template('account.html', title='Account', form=form)
+
+@app.route('/upload_image', methods=['POST'])
+def upload_image():
+    if 'image' in request.files:
+        image_file = request.files['image']
+        image_data = image_file.read()
+        
+        image_file.save('uploads/uploaded_image.jpg')
+        
+        return render_template('display_image.html', image_path='uploads/uploaded_image.jpg')
+    else:
+        return "No image found in request"
 
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required

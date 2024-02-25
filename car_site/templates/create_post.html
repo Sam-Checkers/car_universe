@@ -31,10 +31,14 @@
                     {{ form.content(class="form-control form-control-lg") }}
                 {% endif %}
             </div>
+            <div>
+                <h2>Upload Image</h2>
+                <form action="/upload_image" method="post" enctype="multipart/form-data">
+                    <input type="file" name="image" accept="image/*">
+                    <input type="submit" value="Upload">
+                </form>
+              </div>
         </fieldset>
-        <div class="form-group">
-            {{ form.submit(class="btn btn-outline-info") }}
-        </div>
     </form>
 </div>
 {% endblock content %}
