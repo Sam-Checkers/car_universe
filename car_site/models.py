@@ -56,3 +56,10 @@ class Post(db.Model):
 
     def __repr__(self):
         return f"Post('{self.title}', '{self.date_posted}')"
+    
+class ContactSchema(ma.Schema):
+    class Meta:
+        fields = ['id', 'title','content']
+
+contact_schema = ContactSchema()
+contacts_schema = ContactSchema(many=True)

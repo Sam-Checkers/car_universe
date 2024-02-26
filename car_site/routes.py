@@ -1,12 +1,9 @@
-from flask import render_template, url_for, flash, redirect, request, abort
+from flask import render_template, url_for, flash, redirect, request, abort, jsonify
 from car_site.forms import RegistrationForm, LoginForm, UpdateAccountForm, PostForm
-from car_site.models import User, Post, check_password_hash, db
+from car_site.models import User, Post, check_password_hash, db, contact_schema, contacts_schema
 from flask_login import login_user, current_user, logout_user, login_required 
 from car_site import app
-from PIL import Image
-import numpy as np
-import base64
-import os
+
 
 @app.route("/")
 @app.route("/home")
@@ -57,7 +54,7 @@ def login():
             return redirect(url_for('home'))
         else:
             flash('Check email and password')
-            return redirect(url_for('auth.signin'))
+            return redirect(url_for('home'))
     return render_template('login.html', title='Login', form=form)
 
 @app.route("/logout")
@@ -80,18 +77,6 @@ def account():
         form.email.data = current_user.email
     return render_template('account.html', title='Account', form=form)
 
-@app.route('/upload_image', methods=['POST'])
-def upload_image():
-    if 'image' in request.files:
-        image_file = request.files['image']
-        image_data = image_file.read()
-        
-        image_file.save('uploads/uploaded_image.jpg')
-        
-        return render_template('display_image.html', image_path='uploads/uploaded_image.jpg')
-    else:
-        return "No image found in request"
-
 @app.route("/post/new", methods=['GET', 'POST'])
 @login_required
 def new_post():
@@ -102,7 +87,7 @@ def new_post():
         db.session.commit()
         flash('Your post has been created!', 'success')
         return redirect(url_for('home'))
-    return render_template('create_post.html', title='New Car', form=form, legend='New Car', content='Content')
+    return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
 @app.route("/post/<int:post_id>")
 def post(post_id):
@@ -139,3 +124,72 @@ def delete_post(post_id):
     db.session.commit()
     flash('Your post has been deleted!', 'success')
     return redirect(url_for('home'))
+
+@app.route('/getdata')
+def getdata():
+    return {'test': '1'}
+
+@app.route('/user_posts/<int:user_id>', methods=['GET'])
+def get_user_posts(user_id):
+    user = User.query.get(user_id)
+    if user:
+        posts = user.posts
+        serialized_posts = contacts_schema.dump(posts)
+        return jsonify(serialized_posts)
+    else:
+        return jsonify({'message': 'User not found'}), 404
+    
+@app.route('/user_posts/<int:user_id>/<int:post_id>', methods=['GET'])
+def get_user_post(user_id, post_id):
+    user = User.query.get(user_id)
+    if user:
+        post = Post.query.filter_by(id=post_id, user_id=user_id).first()
+        if post:
+            serialized_post = contact_schema.dump(post)
+            return jsonify(serialized_post)
+        else:
+            return jsonify({'message': 'Post not found for the user'}), 404
+    else:
+        return jsonify({'message': 'User not found'}), 404
+    
+@app.route('/user_posts/<int:user_id>/<int:post_id>', methods=['PUT'])
+def update_user_post(user_id, post_id):
+    user = User.query.get(user_id)
+    if user:
+        post = Post.query.filter_by(id=post_id, user_id=user_id).first()
+        if post:
+            data = request.get_json()
+            post.title = data.get('title', post.title)
+            post.content = data.get('content', post.content)
+            db.session.commit()
+            return jsonify({'message': 'Post updated successfully'})
+        else:
+            return jsonify({'message': 'Post not found for the user'}), 404
+    else:
+        return jsonify({'message': 'User not found'}), 404
+    
+@app.route('/user_posts/<int:user_id>', methods=['POST'])
+def create_user_post(user_id):
+    user = User.query.get(user_id)
+    if user:
+        data = request.get_json()
+        new_post = Post(title=data.get('title'), content=data.get('content'), user_id=user_id)
+        db.session.add(new_post)
+        db.session.commit()
+        return jsonify({'message': 'Post created successfully'})
+    else:
+        return jsonify({'message': 'User not found'}), 404
+    
+@app.route('/user_posts/<int:user_id>/<int:post_id>', methods=['DELETE'])
+def delete_user_post(user_id, post_id):
+    user = User.query.get(user_id)
+    if user:
+        post = Post.query.filter_by(id=post_id, user_id=user_id).first()
+        if post:
+            db.session.delete(post)
+            db.session.commit()
+            return jsonify({'message': 'Post deleted successfully'})
+        else:
+            return jsonify({'message': 'Post not found for the user'}), 404
+    else:
+        return jsonify({'message': 'User not found'}), 404
